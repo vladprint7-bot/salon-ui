@@ -1,47 +1,40 @@
 "use client";
-import { useEffect, useState } from "react";
 import QRCode from "qrcode.react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function AdminPage() {
-  const salonId = process.env.NEXT_PUBLIC_SALON_ID!;
+  const salonId = process.env.NEXT_PUBLIC_SALON_ID || "demo-salon";
+
+  // URL kreiramo tek na klijentu
   const [scanUrl, setScanUrl] = useState<string>("");
-  const pathOnly = `/scan?salonId=${encodeURIComponent(salonId)}`;
 
   useEffect(() => {
-    setScanUrl(`${window.location.origin}${pathOnly}`);
-  }, [pathOnly]);
+    const base = window.location.origin;
+    setScanUrl(`${base}/scan?salonId=${encodeURIComponent(salonId)}`);
+  }, [salonId]);
 
   return (
-    <main style={{ padding: 24, maxWidth: 780, margin: "0 auto" }}>
-      <h1 style={{ marginBottom: 8 }}>QR kod — {salonId}</h1>
-      <p style={{ marginBottom: 16 }}>
-        Odštampaj i postavi na pult. Klijent skenira kod posle tretmana da doda bod i dobije link za recenziju.
-      </p>
+    <main style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
+      <h1>QR kod — {salonId} ✅</h1>
+      <p>Odštampaj i postavi na pult. Klijent skenira posle tretmana.</p>
 
-      <div style={{ background: "#fff", padding: 16, display: "inline-block", border: "1px solid #eee" }}>
-        <QRCode value={scanUrl || pathOnly} size={240} />
-      </div>
+      {/* Dok se ne izračuna scanUrl na klijentu, ne renderujemo QR ni tekst URL-a */}
+      {scanUrl ? (
+        <>
+          <div style={{ background: "#fff", padding: 16, display: "inline-block" }}>
+            <QRCode value={scanUrl} size={260} />
+          </div>
+          <div style={{ marginTop: 8, fontFamily: "monospace" }}>{scanUrl}</div>
+        </>
+      ) : (
+        <div style={{ height: 280, display: "flex", alignItems: "center" }}>Pripremam QR…</div>
+      )}
 
-      {/* Tekst – samo path da nema hydration razlike */}
-      <p style={{ marginTop: 12, fontFamily: "monospace", wordBreak: "break-all" }}>{pathOnly}</p>
-
-      <div style={{ marginTop: 12 }}>
-        ➡️ Idi na{" "}
-        <a href="/admin/wallet" style={{ fontWeight: 600 }}>
-          /admin/wallet
-        </a>{" "}
-        za proveru poena i Redeem na kasi.
-      </div>
-
-      <hr style={{ margin: "24px 0" }} />
-      <h2>Poster za štampu (A4)</h2>
-      <div style={{ width: 794, height: 1123, padding: 40, background: "#fff", boxShadow: "0 0 0 1px #eee" }}>
-        <h1 style={{ margin: 0 }}>Skeniraj &amp; osvoji bod</h1>
-        <p>Svaka poseta = 1 bod. Na 5 bodova – nagrada!</p>
-        <div style={{ marginTop: 40 }}>
-          <QRCode value={scanUrl || pathOnly} size={320} />
-        </div>
-        <p style={{ marginTop: 24, fontFamily: "monospace", wordBreak: "break-all" }}>{pathOnly}</p>
+      <div style={{ marginTop: 16 }}>
+        <Link href="/admin/wallet" style={{ padding: "10px 14px", border: "1px solid #ccc" }}>
+          Kasa / Wallet
+        </Link>
       </div>
     </main>
   );
